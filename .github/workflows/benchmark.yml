@@ -32,5 +32,5 @@ jobs:
       run: ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
     - uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.LIBRARY }}-${{ env.NUM_MESSAGES }}-${{ env.MESSAGE_SIZE }}-name
+        name: ${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}-name
         path: results.json
