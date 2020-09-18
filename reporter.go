@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/onsi/ginkgo/config"
@@ -35,7 +34,6 @@ func (reporter *JSONReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 			Measurements: []map[string]interface{}{},
 		}
 		for _, value := range specSummary.Measurements {
-			fmt.Printf("SpecDidComplete: %+v", value)
 			measurement := map[string]interface{}{
 				"name":         value.Name,
 				"results":      value.Results,

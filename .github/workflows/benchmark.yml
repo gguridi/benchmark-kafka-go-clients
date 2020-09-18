@@ -11,6 +11,8 @@ jobs:
         num_messages: [100]
         message_size: [1000]
     steps:
+    - name: Run Kafka instance
+      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0        
     - uses: actions/checkout@v2
     - name: Install Go
       uses: actions/setup-go@v2
@@ -18,8 +20,10 @@ jobs:
         go-version: 1.14.x
     - name: Install Ginkgo
       run: go get -u github.com/onsi/ginkgo/ginkgo
-    - name: Run Kafka instance
-      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0
+    - name: Create topic
+      run: |
+        COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
+        docker exec benchmark-kafka /bin/bash -c "$COMMAND"
     - name: Test
       env:
         LIBRARY: ${{ matrix.library }}
