@@ -1,0 +1,32 @@
+name: Benchmark
+
+on: push
+
+jobs:
+  producer-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        library: ["sarama", "confluent", "kafkago"]
+        num_messages: [100]
+        message_size: [1000]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.14.x
+    - name: Install Ginkgo
+      run: go get -u github.com/onsi/ginkgo/ginkgo
+    - name: Run Kafka instance
+      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0
+    - name: Test
+      env:
+        LIBRARY: ${{ matrix.library }}
+        NUM_MESSAGES: ${{ matrix.num_messages }}
+        MESSAGE_SIZE: ${{ matrix.message_size }}
+      run: ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.LIBRARY }}-${{ env.NUM_MESSAGES }}-${{ env.MESSAGE_SIZE }}-name
+        path: results.json
