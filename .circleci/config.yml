@@ -32,7 +32,6 @@ jobs:
           name: Install Ginkgo
           command: |
             ginkgo ./... -- -library=<< parameters.library >> -num=<< parameters.num_messages >> -size=<< parameters.message_size >>
-            mv results.json results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
       - store_artifacts:
           path: results.json
           destination: results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
