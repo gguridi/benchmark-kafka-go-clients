@@ -1,0 +1,46 @@
+version: 2.1
+
+jobs:
+  benchmark:
+    parameters:
+      library:
+        type: string
+      num_messages:
+        type: string
+      message_size:
+        type: string
+    working_directory: /go/src/github.com/hybridtheory/benchmark-kafka-go-clients
+    machine:
+        image: ubuntu-2004:202008-01
+    steps:
+      - checkout
+      - run:
+          name: Running Kafka instance
+          command: |
+            docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0
+      - run:
+          name: Install Ginkgo
+          command: |
+            go get -u github.com/onsi/ginkgo/ginkgo
+      - run:
+          name: Create topic
+          command: |
+            COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
+            docker exec benchmark-kafka /bin/bash -c "$COMMAND"
+      - run:
+          name: Install Ginkgo
+          command: |
+            ginkgo ./... -- -library=<< parameters.library >> -num=<< parameters.num_messages >> -size=<< parameters.message_size >>
+      - store_artifacts:
+          path: results.json
+          destination: results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
+
+workflows:
+  producers:
+    jobs:
+      - benchmark:
+          matrix:
+            parameters:
+              library: ["sarama", "confluent", "kafkago"]
+              num_messages: [100]
+              message_size: [1000]
