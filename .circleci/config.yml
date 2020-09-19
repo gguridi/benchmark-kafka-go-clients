@@ -6,9 +6,9 @@ jobs:
       library:
         type: string
       num_messages:
-        type: string
+        type: integer
       message_size:
-        type: string
+        type: integer
     working_directory: /go/src/github.com/hybridtheory/benchmark-kafka-go-clients
     machine:
         image: ubuntu-2004:202008-01
