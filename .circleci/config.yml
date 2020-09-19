@@ -32,9 +32,21 @@ jobs:
           name: Install Ginkgo
           command: |
             ginkgo ./... -- -library=<< parameters.library >> -num=<< parameters.num_messages >> -size=<< parameters.message_size >>
+            mv results.json results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
+      - persist_to_workspace:
+        root: ~/src/github.com/hybridtheory/benchmark-kafka-go-clients
+        paths:
+            - results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
       - store_artifacts:
-          path: results.json
-          destination: results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
+          path: results-<< parameters.library >>-<< parameters.num_messages >>-<< parameters.message_size >>.json
+
+  publish:
+    working_directory: ~/src/github.com/hybridtheory/benchmark-kafka-go-clients
+    machine:
+        image: ubuntu-2004:202008-01
+    steps:
+      - store_artifacts:
+          path: *.json
 
 workflows:
   producers:
@@ -45,3 +57,6 @@ workflows:
               library: ["sarama", "confluent", "kafkago"]
               num_messages: [100]
               message_size: [1000]
+      - publish:
+          requires:
+            - benchmark
