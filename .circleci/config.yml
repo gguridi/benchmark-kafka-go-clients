@@ -50,8 +50,10 @@ jobs:
     machine:
         image: ubuntu-2004:202008-01
     steps:
+      - attach_workspace:
+          at: ./
       - store_artifacts:
-          path: ./results
+          path: results/
 
 workflows:
   producers:
