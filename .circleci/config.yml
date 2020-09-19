@@ -46,7 +46,7 @@ jobs:
         image: ubuntu-2004:202008-01
     steps:
       - store_artifacts:
-          path: *.json
+          path: ./
 
 workflows:
   producers:
