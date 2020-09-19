@@ -9,10 +9,11 @@ jobs:
         type: integer
       message_size:
         type: integer
-    working_directory: /go/src/github.com/hybridtheory/benchmark-kafka-go-clients
+    working_directory: ~/src/github.com/hybridtheory/benchmark-kafka-go-clients
     machine:
         image: ubuntu-2004:202008-01
     steps:
+      - run: echo 'export GOPATH=$HOME' >> $BASH_ENV
       - checkout
       - run:
           name: Running Kafka instance
