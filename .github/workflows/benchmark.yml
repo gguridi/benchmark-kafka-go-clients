@@ -34,3 +34,12 @@ jobs:
       with:
         name: results-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}.json
         path: results.json
+
+  publish:
+    needs: producer-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: results
