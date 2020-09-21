@@ -29,7 +29,9 @@ jobs:
         LIBRARY: ${{ matrix.library }}
         NUM_MESSAGES: ${{ matrix.num_messages }}
         MESSAGE_SIZE: ${{ matrix.message_size }}
-      run: ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
+      if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 1000 }}
+      run: |
+        ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
     - uses: actions/upload-artifact@v2
       with:
         name: results-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}.json
@@ -40,6 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install vue-material-dashboard
+        run: git clone https://github.com/creativetimofficial/vue-material-dashboard.git --branch=v1.4.0 web/dashboard
       - uses: actions/download-artifact@v2
         with:
           path: results
+      - name: Deploy into github pages
+        run: yarn run deploy

@@ -35,14 +35,12 @@ var _ = Describe("Benchmarks", func() {
 			}
 			break
 		case "kafkago":
-			if NumMessages <= 1000 {
-				process, finish := GetKafkaGo()
-				b.Time(name, func() {
-					process()
-				})
-				if err := finish(); err != nil {
-					log.WithError(err).Panic("Unable to close the producer")
-				}
+			process, finish := GetKafkaGo()
+			b.Time(name, func() {
+				process()
+			})
+			if err := finish(); err != nil {
+				log.WithError(err).Panic("Unable to close the producer")
 			}
 			break
 		default:

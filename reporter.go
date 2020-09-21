@@ -12,11 +12,16 @@ type JSONReporter struct {
 }
 
 type JSON struct {
+	Name string `json:"name"`
 	Library      string                   `json:"library"`
 	NumMessages  int                      `json:"numMessages"`
 	SizeMessages int                      `json:"sizeMessages`
 	NumSamples   int                      `json:"numberOfSamples"`
-	Measurements []map[string]interface{} `json:"measurements"`
+	Results []interface{} `json:"results"`
+	Smallest interface{} `json:"smallest"`
+	Largest interface{} `json:"largest"`
+	Average interface{} `json:"average"`
+	StdDeviation interface{} `json:"stdDeviation"`
 }
 
 func NewJSONReporter() *JSONReporter {
@@ -34,15 +39,12 @@ func (reporter *JSONReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 			Measurements: []map[string]interface{}{},
 		}
 		for _, value := range specSummary.Measurements {
-			measurement := map[string]interface{}{
-				"name":         value.Name,
-				"results":      value.Results,
-				"smallest":     value.Smallest,
-				"largest":      value.Largest,
-				"average":      value.Average,
-				"stdDeviation": value.StdDeviation,
-			}
-			report.Measurements = append(report.Measurements, measurement)
+			report.Name = value.Name
+			report.Results = value.Results
+			report.Smallest = value.Smallest
+			report.Largest = value.Largest
+			report.Average = value.Average
+			report.StdDeviation = value.StdDeviation
 		}
 
 		data, _ := json.Marshal(report)

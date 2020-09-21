@@ -14,3 +14,11 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 .history/
+.vscode/
+node_modules/
+dashboard/
+results/
+dist/
+package-lock.json
+yarn.lock
+/docs
