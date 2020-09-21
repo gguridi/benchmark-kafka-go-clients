@@ -48,4 +48,6 @@ jobs:
         with:
           path: results
       - name: Deploy into github pages
-        run: yarn run deploy
+        run: |
+          cd web/
+          yarn run deploy
