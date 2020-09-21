@@ -12,15 +12,15 @@ type JSONReporter struct {
 }
 
 type JSON struct {
-	Name string `json:"name"`
-	Library      string                   `json:"library"`
-	NumMessages  int                      `json:"numMessages"`
-	SizeMessages int                      `json:"sizeMessages`
-	NumSamples   int                      `json:"numberOfSamples"`
-	Results []interface{} `json:"results"`
-	Smallest interface{} `json:"smallest"`
-	Largest interface{} `json:"largest"`
-	Average interface{} `json:"average"`
+	Name         string      `json:"name"`
+	Library      string      `json:"library"`
+	NumMessages  int         `json:"numMessages"`
+	SizeMessages int         `json:"sizeMessages`
+	NumSamples   int         `json:"numberOfSamples"`
+	Results      []float64   `json:"results"`
+	Smallest     interface{} `json:"smallest"`
+	Largest      interface{} `json:"largest"`
+	Average      interface{} `json:"average"`
 	StdDeviation interface{} `json:"stdDeviation"`
 }
 
@@ -36,7 +36,6 @@ func (reporter *JSONReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 			NumMessages:  NumMessages,
 			SizeMessages: MessageSize,
 			NumSamples:   specSummary.NumberOfSamples,
-			Measurements: []map[string]interface{}{},
 		}
 		for _, value := range specSummary.Measurements {
 			report.Name = value.Name
