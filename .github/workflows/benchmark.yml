@@ -34,7 +34,7 @@ jobs:
         ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
     - uses: actions/upload-artifact@v2
       with:
-        name: results-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}.json
+        name: producer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}.json
         path: results.json
 
   publish:
