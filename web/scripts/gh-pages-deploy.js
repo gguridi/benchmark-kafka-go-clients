@@ -7,15 +7,11 @@ const fs = require("fs");
         console.log("Building started...");
         await execa("yarn", ["install"]);
         await execa("yarn", ["build"]);
-        const folderName = fs.existsSync("dist") ? "dist" : "build";
-        await execa("git", ["--work-tree", folderName, "add", "--all"]);
-        await execa("git", [
-            "--work-tree",
-            folderName,
-            "commit",
-            "-m",
-            "gh-pages",
-        ]);
+        const folder = fs.existsSync("dist") ? "dist" : "build";
+        await execa("git", ["config", "user.email", "gorka.guridi@gmail.com"]);
+        await execa("git", ["config", "user.name", "Gorka Guridi"]);
+        await execa("git", ["--work-tree", folder, "add", "--all"]);
+        await execa("git", ["--work-tree", folder, "commit", "-m", "gh-pages"]);
         console.log("Pushing to gh-pages...");
         await execa("git", ["push", "origin", "HEAD:gh-pages", "--force"]);
         await execa("rm", ["-r", folderName]);
