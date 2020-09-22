@@ -50,4 +50,5 @@ jobs:
       - name: Deploy into github pages
         run: |
           cd web/
+          yarn install
           yarn run deploy
