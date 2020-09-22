@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        library: ["sarama", "confluent"]
-        num_messages: [100]
+        library: ["sarama", "confluent", "kafkago"]
+        num_messages: [100, 1000, 10000]
         message_size: [1000]
     steps:
     - name: Run Kafka instance

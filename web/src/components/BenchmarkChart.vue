@@ -3,7 +3,7 @@
         :chart-data="data"
         :chart-options="options"
         :chart-type="'Bar'"
-        :data-background-color="backgroundColor"
+        :data-background-color="background"
     >
         <template slot="content">
             <h4 class="title">{{ winner }}</h4>
@@ -20,10 +20,6 @@ export default {
     },
     name: "benchmark-chart",
     props: {
-        backgroundColor: {
-            type: String,
-            default: "",
-        },
         type: {
             type: String,
         },
@@ -35,6 +31,9 @@ export default {
         },
     },
     data() {
+        const backgrounds = ["purple", "blue", "green", "orange", "red"];
+        const background =
+            backgrounds[Math.floor(Math.random() * backgrounds.length)];
         const clients = ["confluent", "sarama", "kafkago"];
         const average = [];
         for (const client of clients) {
@@ -53,6 +52,7 @@ export default {
         return {
             winner: winner,
             description: `${this.num} messages/${this.size} bytes each`,
+            background: background,
             data: {
                 labels: clients,
                 series: [average],
