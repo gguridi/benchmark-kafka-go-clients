@@ -46,5 +46,5 @@ var _ = Describe("Benchmarks", func() {
 		default:
 			log.Panicf("Unable to find the libray %+v", Library)
 		}
-	}, 10)
+	}, 5)
 })
