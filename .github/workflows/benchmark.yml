@@ -48,7 +48,10 @@ jobs:
         with:
           path: web/src/results
       - name: Tree
-        run: tree .
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tree
+          tree .
       - name: Deploy into github pages
         run: |
           cd web/
