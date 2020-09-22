@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        library: ["sarama", "confluent", "kafkago"]
+        library: ["sarama", "confluent"]
         num_messages: [100]
         message_size: [1000]
     steps:
@@ -47,6 +47,8 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           path: web/src/results
+      - name: Tree
+        run: tree .
       - name: Deploy into github pages
         run: |
           cd web/
