@@ -5,6 +5,7 @@
         <side-bar
             :sidebar-item-color="sidebarBackground"
             :sidebar-background-image="sidebarBackgroundImage"
+            :title="'Kafka Go Clients'"
         >
             <mobile-menu slot="content"></mobile-menu>
             <sidebar-link to="/producers">

@@ -8,8 +8,8 @@ jobs:
     strategy:
       matrix:
         library: ["sarama", "confluent", "kafkago"]
-        num_messages: [100, 1000, 10000]
-        message_size: [1000]
+        num_messages: [100, 1000, 10000, 100000, 1000000]
+        message_size: [1000, 5000]
     steps:
     - name: Run Kafka instance
       run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0        

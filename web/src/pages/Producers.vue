@@ -41,8 +41,8 @@
             >
                 <benchmark-chart
                     :type="'producer'"
-                    :num="10000000"
-                    :size="1000"
+                    :num="1000000"
+                    :size="5000"
                 />
             </div>
         </div>
