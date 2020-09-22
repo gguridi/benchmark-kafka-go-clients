@@ -46,7 +46,7 @@ jobs:
         run: git clone https://github.com/creativetimofficial/vue-material-dashboard.git --branch=v1.4.0 web/dashboard
       - uses: actions/download-artifact@v2
         with:
-          path: results
+          path: web/src/results
       - name: Deploy into github pages
         run: |
           cd web/
