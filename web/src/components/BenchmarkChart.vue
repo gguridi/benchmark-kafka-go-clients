@@ -47,6 +47,7 @@ export default {
         const min = Math.min.apply(Math, average.filter(Boolean));
         const max = Math.max.apply(Math, average);
         const winner = clients[average.findIndex((value) => value === min)];
+        const low = Math.round(min) - 1;
         const high = Math.round(max) + 1;
 
         return {
@@ -61,8 +62,8 @@ export default {
                 axisX: {
                     showGrid: false,
                 },
-                low: 0,
-                high: max,
+                low: low > 0 ? low : 0,
+                high: high,
                 chartPadding: {
                     top: 0,
                     right: 0,
