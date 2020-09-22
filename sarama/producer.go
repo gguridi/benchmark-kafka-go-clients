@@ -14,6 +14,7 @@ var (
 	Done = make(chan bool)
 )
 
+// NewProducer returns a new Sarama async producer.
 func NewProducer(brokers string) sarama.AsyncProducer {
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
@@ -29,6 +30,8 @@ func NewProducer(brokers string) sarama.AsyncProducer {
 	return producer
 }
 
+// Prepare returns a function that can be used during the benchmark as it only
+// performs the sending of messages, checking that the sending was successful.
 func Prepare(producer sarama.AsyncProducer, message []byte, numMessages int) func() {
 	log.Debugf("Preparing to send message of %d bytes %d times", len(message), numMessages)
 

@@ -1,6 +1,9 @@
 name: Benchmark
 
-on: push
+on: 
+  push:
+    branches:
+    - master
 
 jobs:
   producer-test:
@@ -47,11 +50,6 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           path: web/src/results
-      - name: Tree
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tree
-          tree .
       - name: Deploy into github pages
         run: |
           cd web/

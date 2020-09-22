@@ -11,6 +11,7 @@ var (
 	Done = make(chan bool)
 )
 
+// NewProducer returns a new confluent producer.
 func NewProducer(brokers string) *kafka.Producer {
 	config := &kafka.ConfigMap{"bootstrap.servers": brokers, "linger.ms": 100}
 	producer, err := kafka.NewProducer(config)
@@ -20,6 +21,8 @@ func NewProducer(brokers string) *kafka.Producer {
 	return producer
 }
 
+// Prepare returns a function that can be used during the benchmark as it only
+// performs the sending of messages, checking that the sending was successful.
 func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 	topic := viper.GetString("kafka.topic")
 	log.Debugf("Preparing to send message of %d bytes %d times", len(message), numMessages)

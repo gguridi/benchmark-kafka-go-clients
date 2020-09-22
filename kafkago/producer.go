@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// NewProducer returns a new kafkago writer.
 func NewProducer(brokers string) *kafkago.Writer {
 	return kafkago.NewWriter(kafkago.WriterConfig{
 		Brokers:       []string{brokers},
@@ -22,6 +23,8 @@ func NewProducer(brokers string) *kafkago.Writer {
 	})
 }
 
+// Prepare returns a function that can be used during the benchmark as it only
+// performs the sending of messages.
 func Prepare(writer *kafkago.Writer, message []byte, numMessages int) func() {
 	log.Debugf("Preparing to send message of %d bytes %d times", len(message), numMessages)
 	return func() {
