@@ -28,7 +28,6 @@
 import ContentFooter from "./ContentFooter.vue";
 import DashboardContent from "@/pages/Layout/Content.vue";
 import MobileMenu from "@/pages/Layout/MobileMenu.vue";
-import FixedPlugin from "@/pages/Layout/Extra/FixedPlugin.vue";
 
 export default {
     components: {

@@ -48,8 +48,6 @@ jobs:
         with:
           path: results
       - name: Deploy into github pages
-        env:
-          CI: false
         run: |
           cd web/
           yarn install
