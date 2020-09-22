@@ -39,7 +39,7 @@ export default {
         const average = [];
         for (const client of clients) {
             try {
-                const data = require(`../results/${this.type}-${client}-${this.num}-${this.size}.json`);
+                const data = require(`../results/${this.type}-${client}-${this.num}-${this.size}/results.json`);
                 average.push(data["average"]);
             } catch (e) {
                 average.push(0);
