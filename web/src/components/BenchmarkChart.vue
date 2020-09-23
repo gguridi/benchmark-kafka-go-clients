@@ -34,7 +34,14 @@ export default {
         const backgrounds = ["purple", "blue", "green", "orange", "red"];
         const background =
             backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        const clients = ["confluent", "sarama", "kafkago"];
+        const producers = ["confluent", "sarama", "kafkago"];
+        const consumers = [
+            "confluent-poll",
+            "confluent-channel",
+            "sarama",
+            "kafkago",
+        ];
+        const clients = this.type == "producer" ? producers : consumers;
         const average = [];
         for (const client of clients) {
             try {
