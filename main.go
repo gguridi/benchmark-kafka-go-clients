@@ -5,11 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/gguridi/benchmark-kafka-go-clients/confluent"
-	"github.com/gguridi/benchmark-kafka-go-clients/kafkago"
-	"github.com/gguridi/benchmark-kafka-go-clients/sarama"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -37,24 +33,6 @@ func GenMessage() []byte {
 		b[i] = Characters[rand.Intn(len(Characters))]
 	}
 	return []byte(string(b))
-}
-
-// GetConfluent initialises a confluent producer and prepares the benchmark function.
-func GetConfluent() (func(), func()) {
-	producer := confluent.NewProducer(viper.GetString("kafka.brokers"))
-	return confluent.Prepare(producer, GenMessage(), NumMessages), producer.Close
-}
-
-// GetSarama initialises a sarama producer and prepares the benchmark function.
-func GetSarama() (func(), func() error) {
-	producer := sarama.NewProducer(viper.GetString("kafka.brokers"))
-	return sarama.Prepare(producer, GenMessage(), NumMessages), producer.Close
-}
-
-// GetKafkaGo initialises a kafkago writer and prepares the benchmark function.
-func GetKafkaGo() (func(), func() error) {
-	writer := kafkago.NewProducer(viper.GetString("kafka.brokers"))
-	return kafkago.Prepare(writer, GenMessage(), NumMessages), writer.Close
 }
 
 func main() {

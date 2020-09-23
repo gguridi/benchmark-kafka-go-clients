@@ -1,5 +1,6 @@
 import DashboardLayout from "../pages/Layout/DashboardLayout.vue";
 import Producers from "../pages/Producers.vue";
+import Consumers from "../pages/Consumers.vue";
 
 const routes = [
     {
@@ -15,7 +16,7 @@ const routes = [
             {
                 path: "consumers",
                 name: "Consumers",
-                component: Producers,
+                component: Consumers,
             },
         ],
     },
