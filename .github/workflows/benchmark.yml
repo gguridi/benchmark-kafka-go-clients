@@ -14,6 +14,8 @@ jobs:
         num_messages: [100, 1000, 10000, 100000, 1000000]
         message_size: [1000, 5000]
     steps:
+    - name: Free disk space
+      run: sudo apt-get clean && df -h      
     - name: Run Kafka instance
       run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
     - uses: actions/checkout@v2
@@ -48,6 +50,8 @@ jobs:
         num_messages: [10000, 100000, 1000000, 10000000]
         message_size: [1000, 5000]
     steps:
+    - name: Free disk space
+      run: sudo apt-get clean && df -h
     - name: Run Kafka instance
       run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
     - uses: actions/checkout@v2
