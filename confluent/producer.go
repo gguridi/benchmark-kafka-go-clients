@@ -25,7 +25,7 @@ func NewProducer(brokers string) *kafka.Producer {
 // performs the sending of messages, checking that the sending was successful.
 func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 	topic := viper.GetString("kafka.topic")
-	log.Debugf("Preparing to send message of %d bytes %d times", len(message), numMessages)
+	log.Infof("Preparing to send message of %d bytes %d times", len(message), numMessages)
 
 	go func() {
 		var msgCount int
@@ -36,7 +36,7 @@ func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 			}
 			msgCount++
 			if msgCount >= numMessages {
-				log.Debugf("Sent %d messages... stopping...", msgCount)
+				log.Infof("Sent %d messages... stopping...", msgCount)
 				Done <- true
 			}
 		}

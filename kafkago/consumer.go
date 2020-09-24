@@ -24,7 +24,7 @@ func NewReader(brokers string) *kafkago.Reader {
 // PrepareReader returns a function that can be used during the benchmark as it only
 // performs the consuming of messages.
 func PrepareReader(reader *kafkago.Reader, numMessages int) func() {
-	log.Debugf("Preparing to receive %d messages", numMessages)
+	log.Infof("Preparing to receive %d messages", numMessages)
 	return func() {
 		ctx := context.Background()
 		count := 0

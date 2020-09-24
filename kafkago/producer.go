@@ -26,7 +26,7 @@ func NewProducer(brokers string) *kafkago.Writer {
 // Prepare returns a function that can be used during the benchmark as it only
 // performs the sending of messages.
 func Prepare(writer *kafkago.Writer, message []byte, numMessages int) func() {
-	log.Debugf("Preparing to send message of %d bytes %d times", len(message), numMessages)
+	log.Infof("Preparing to send message of %d bytes %d times", len(message), numMessages)
 	return func() {
 		for j := 0; j < numMessages; j++ {
 			err := writer.WriteMessages(context.Background(), kafkago.Message{Value: message})
