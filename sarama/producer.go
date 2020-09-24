@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -37,7 +38,7 @@ func Prepare(producer sarama.AsyncProducer, message []byte, numMessages int) fun
 
 	go func() {
 		var nomessages int
-		for _ = range producer.Successes() {
+		for range producer.Successes() {
 			nomessages++
 			if nomessages%numMessages == 0 {
 				log.Infof("Sent %d messages... stopping...", nomessages)
@@ -56,7 +57,7 @@ func Prepare(producer sarama.AsyncProducer, message []byte, numMessages int) fun
 		for j := 0; j < numMessages; j++ {
 			producer.Input() <- &sarama.ProducerMessage{
 				Topic:     viper.GetString("kafka.topic"),
-				Partition: viper.GetInt32("kafka.partition"),
+				Partition: kafka.PartitionAny,
 				Value:     sarama.ByteEncoder(message),
 			}
 		}
