@@ -65,6 +65,8 @@ var _ = Describe("Benchmarks", func() {
 				producer := sarama.NewProducer(viper.GetString("kafka.brokers"))
 				process := sarama.Prepare(producer, GenMessage(), NumMessages)
 				process()
+				producer.Close()
+				log.Infof("Producer finished sending message... closing it...")
 			}
 			initialised = true
 		})
