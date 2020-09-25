@@ -63,7 +63,7 @@ var _ = Describe("Benchmarks", func() {
 			if !initialised {
 				log.Infof("Prepopulating Kafka with %d messages of %d bytes", NumMessages, MessageSize)
 				producer := sarama.NewProducer(viper.GetString("kafka.brokers"))
-				process := sarama.Prepare(producer, GenMessage(), NumMessages+1000)
+				process := sarama.Prepare(producer, GenMessage(), NumMessages+10000)
 				process()
 				<-sarama.Done
 				producer.Close()
