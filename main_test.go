@@ -67,6 +67,7 @@ var _ = Describe("Benchmarks", func() {
 				process()
 				<-sarama.Done
 				producer.Close()
+				log.Infof("Finished prepopulating Kafka")
 			}
 			initialised = true
 		})
@@ -114,6 +115,6 @@ var _ = Describe("Benchmarks", func() {
 			default:
 				log.Panicf("Unable to find the libray %+v", Library)
 			}
-		}, 2)
+		}, 1)
 	})
 })
