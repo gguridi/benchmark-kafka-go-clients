@@ -34,7 +34,7 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for range claim.Messages() {
+	for message := range claim.Messages() {
 		if consumer.counter >= consumer.numMessages {
 			log.Infof("Consumed %d messages successfully...", consumer.counter)
 			consumer.cancel()
@@ -42,6 +42,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		}
 		// log.Infof("I'm consuming! %d", consumer.count)
 		consumer.counter++
+		session.MarkMessage(message, "")
 	}
 	return nil
 }
