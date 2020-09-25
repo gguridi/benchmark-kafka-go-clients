@@ -9,11 +9,10 @@ jobs:
   producer-test:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
       matrix:
         library: ["sarama", "confluent", "kafkago"]
-        num_messages: [100]
-        message_size: [1000]
+        num_messages: [100, 1000, 10000, 100000, 1000000]
+        message_size: [1000, 5000]
     steps:
     - name: Free disk space
       run: sudo apt-get clean && df -h      
@@ -46,10 +45,9 @@ jobs:
   consumer-test:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
       matrix:
         library: ["sarama", "confluent-poll", "confluent-channel", "kafkago"]
-        num_messages: [10000, 100000]
+        num_messages: [10000, 100000, 1000000, 5000000]
         message_size: [1000, 2500]
     steps:
     - name: Free disk space
