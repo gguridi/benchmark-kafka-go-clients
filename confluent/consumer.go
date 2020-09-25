@@ -28,7 +28,7 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 	consumer.Assign([]kafka.TopicPartition{
 		kafka.TopicPartition{
 			Topic:     &topic,
-			Partition: viper.GetInt32("kafka.partition"),
+			Partition: kafka.PartitionAny,
 			Offset:    0,
 		},
 	})
@@ -38,6 +38,7 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 // PreparePoll returns a function that can be used during the benchmark as it only
 // performs the consuming of messages. It uses the poll/function method.
 func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
+	log.Infof("Preparing to receive %d messages", numMessages)
 	return func() {
 		var count = 0
 		for count < numMessages {
