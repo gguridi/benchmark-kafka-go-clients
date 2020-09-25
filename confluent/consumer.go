@@ -61,6 +61,7 @@ func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 // PrepareChannel returns a function that can be used during the benchmark as it only
 // performs the consuming of messages. It uses the deprecated channel method.
 func PrepareChannel(consumer *kafka.Consumer, numMessages int) func() {
+	log.Infof("Preparing to receive %d messages", numMessages)
 	return func() {
 		var count = 0
 		for count < numMessages {

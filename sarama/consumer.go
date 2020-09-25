@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"sync"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -74,27 +73,21 @@ func NewConsumer(brokers string, numMessages int) *Consumer {
 // PrepareConsume returns a function that can be used during the benchmark as it only
 // performs the consuming of messages.
 func PrepareConsume(consumer *Consumer) func() {
+	topics := strings.Split(viper.GetString("kafka.topic"), ",")
+	log.Infof("Preparing to receive %d messages", consumer.numMessages)
 	return func() {
-
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for {
-				// `Consume` should be called inside an infinite loop, when a
-				// server-side rebalance happens, the consumer session will need to be
-				// recreated to get the new claims.
-				topics := strings.Split(viper.GetString("kafka.topic"), ",")
-				if err := consumer.Client.Consume(consumer.ctx, topics, consumer); err != nil {
-					log.WithError(err).Panic("Error from consumer")
-				}
-				// Check if context was cancelled, signaling that the consumer should stop
-				if consumer.ctx.Err() != nil {
-					log.Info("Reached the number of consumed messages... exiting...")
-					return
-				}
+		for {
+			// `Consume` should be called inside an infinite loop, when a
+			// server-side rebalance happens, the consumer session will need to be
+			// recreated to get the new claims.
+			if err := consumer.Client.Consume(consumer.ctx, topics, consumer); err != nil {
+				log.WithError(err).Panic("Error from consumer")
 			}
-		}()
-		wg.Wait()
+			// Check if context was cancelled, signaling that the consumer should stop
+			if consumer.ctx.Err() != nil {
+				log.Info("Reached the number of consumed messages... exiting...")
+				return
+			}
+		}
 	}
 }
