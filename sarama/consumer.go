@@ -16,7 +16,7 @@ type Consumer struct {
 	Client      sarama.ConsumerGroup
 	ctx         context.Context
 	cancel      context.CancelFunc
-	count       int
+	counter     int
 	numMessages int
 	Ready       chan bool
 }
@@ -35,13 +35,13 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for range claim.Messages() {
-		if consumer.count >= consumer.numMessages {
-			log.Infof("Consumed %d messages successfully...", consumer.count)
+		if consumer.counter >= consumer.numMessages {
+			log.Infof("Consumed %d messages successfully...", consumer.counter)
 			consumer.cancel()
 			return nil
 		}
 		// log.Infof("I'm consuming! %d", consumer.count)
-		consumer.count++
+		consumer.counter++
 	}
 	return nil
 }
