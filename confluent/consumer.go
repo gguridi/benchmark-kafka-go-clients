@@ -25,13 +25,10 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 	}
 
 	topic := viper.GetString("kafka.topic")
-	consumer.Assign([]kafka.TopicPartition{
-		kafka.TopicPartition{
-			Topic:     &topic,
-			Partition: kafka.PartitionAny,
-			Offset:    0,
-		},
-	})
+	err = consumer.SubscribeTopics([]string{topic}, nil)
+	if err != nil {
+		log.WithError(err).Panic("Unable to subscribe to the topic")
+	}
 	return consumer
 }
 
@@ -40,23 +37,22 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 	log.Infof("Preparing to receive %d messages", numMessages)
 	return func() {
-		var count = 0
-		for count < numMessages {
+		var counter = 0
+		for counter < numMessages {
 			if ev := consumer.Poll(100); ev != nil {
 				switch ev.(type) {
 				case *kafka.Message:
-					log.Infof("I'm consuming! %d", count)
-					count++
+					counter++
 				case kafka.PartitionEOF:
 					log.Panic("Reached Partition EOF: %v", ev)
 				case kafka.Error:
-					log.WithError(ev.(error)).Panic("Unable to consume the message")
+					log.WithError(ev.(kafka.Error)).Panic("Unable to consume the message")
 				default:
 					log.Panic("Unable to consume the message: %v", ev)
 				}
 			}
 		}
-		log.Infof("Consumed %d messages successfully...", count)
+		log.Infof("Consumed %d messages successfully...", counter)
 	}
 }
 
@@ -65,20 +61,20 @@ func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 func PrepareChannel(consumer *kafka.Consumer, numMessages int) func() {
 	log.Infof("Preparing to receive %d messages", numMessages)
 	return func() {
-		var count = 0
-		for count < numMessages {
+		var counter = 0
+		for counter < numMessages {
 			select {
 			case ev := <-consumer.Events():
 				switch ev.(type) {
 				case *kafka.Message:
-					count++
+					counter++
 				case kafka.PartitionEOF:
 					log.Panic("Reached Partition EOF: %v", ev)
 				case kafka.Error:
-					log.WithError(ev.(error)).Panic("Unable to consume the message")
+					log.WithError(ev.(kafka.Error)).Panic("Unable to consume the message")
 				}
 			}
 		}
-		log.Infof("Consumed %d messages successfully...", count)
+		log.Infof("Consumed %d messages successfully...", counter)
 	}
 }
