@@ -44,6 +44,7 @@ func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 			if ev := consumer.Poll(100); ev != nil {
 				switch ev.(type) {
 				case *kafka.Message:
+					log.Infof("I'm consuming! %d", count)
 					count++
 				case kafka.PartitionEOF:
 					log.Panic("Reached Partition EOF: %v", ev)
