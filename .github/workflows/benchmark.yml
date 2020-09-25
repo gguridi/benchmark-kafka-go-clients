@@ -74,7 +74,7 @@ jobs:
         MESSAGE_SIZE: ${{ matrix.message_size }}
       if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 10000 }}
       run: |
-        ginkgo -race --progress --compilers=2 -focus=consumer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
+        ginkgo --progress --compilers=2 -focus=consumer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
     - uses: actions/upload-artifact@v2
       with:
         name: consumer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
