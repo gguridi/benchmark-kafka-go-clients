@@ -93,10 +93,8 @@ func PrepareConsume(consumer *Consumer) func() {
 					log.Info("Reached the number of consumed messages... exiting...")
 					return
 				}
-				consumer.Ready = make(chan bool)
 			}
 		}()
-		<-consumer.Ready
 		wg.Wait()
 	}
 }
