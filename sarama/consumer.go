@@ -40,6 +40,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			consumer.cancel()
 			return nil
 		}
+		log.Infof("I'm consuming!")
 		consumer.count++
 	}
 	return nil
