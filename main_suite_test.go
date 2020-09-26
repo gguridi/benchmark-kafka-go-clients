@@ -18,10 +18,6 @@ func TestBenchmark(t *testing.T) {
 // Initialises the configuration for this benchmark.
 func InitConfig() {
 	log.Debug("Initialising viper config")
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	if err := viper.ReadInConfig(); err != nil {
-		log.WithError(err).Panic("Unable to load the configuration")
-	}
+	viper.Set("kafka.brokers", Brokers)
+	viper.Set("kafka.topic", Topic)
 }

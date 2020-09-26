@@ -8,11 +8,20 @@ import (
 	"github.com/gguridi/benchmark-kafka-go-clients/kafkago"
 	"github.com/gguridi/benchmark-kafka-go-clients/sarama"
 	. "github.com/onsi/ginkgo"
+
+	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 var _ = Describe("Benchmarks", func() {
+
+	It("checks lag", func() {
+		flag.Parse()
+		consumer := confluent.NewConsumer(viper.GetString("kafka.brokers"), true)
+		confluent.PreparePoll(consumer, 1)()
+		Expect(confluent.Lag(consumer)).To(Equal(NumMessages))
+	})
 
 	Measure("producer", func(b Benchmarker) {
 		flag.Parse()

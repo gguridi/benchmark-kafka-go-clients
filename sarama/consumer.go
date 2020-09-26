@@ -41,7 +41,6 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			consumer.cancel()
 			return nil
 		}
-		// log.Infof("I'm consuming! %d", consumer.count)
 		consumer.counter++
 		session.MarkMessage(message, "")
 	}
@@ -51,7 +50,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 // NewConsumer returns a new sarama consumer.
 func NewConsumer(brokers string, numMessages int) *Consumer {
 	config := sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
+	config.Version = sarama.V2_0_0_0
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
