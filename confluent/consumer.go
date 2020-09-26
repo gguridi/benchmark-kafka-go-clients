@@ -40,13 +40,13 @@ func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 		var counter = 0
 		for counter < numMessages {
 			if ev := consumer.Poll(100); ev != nil {
-				switch ev.(type) {
+				switch e := ev.(type) {
 				case *kafka.Message:
 					counter++
 				case kafka.PartitionEOF:
 					log.Panic("Reached Partition EOF: %v", ev)
 				case kafka.Error:
-					log.WithError(ev.(kafka.Error)).Panic("Unable to consume the message")
+					log.WithError(e).Panic("Unable to consume the message")
 				default:
 					log.Panic("Unable to consume the message: %v", ev)
 				}
