@@ -1,6 +1,6 @@
 name: Benchmark
 
-on: 
+on:
   push:
     branches:
     - master
@@ -14,8 +14,10 @@ jobs:
         num_messages: [100, 1000, 10000, 100000, 1000000]
         message_size: [1000, 5000]
     steps:
+    - name: Free disk space
+      run: sudo apt-get clean && df -h      
     - name: Run Kafka instance
-      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.11-2.0.0        
+      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
     - uses: actions/checkout@v2
     - name: Install Go
       uses: actions/setup-go@v2
@@ -34,14 +36,52 @@ jobs:
         MESSAGE_SIZE: ${{ matrix.message_size }}
       if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 1000 }}
       run: |
-        ginkgo ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
+        ginkgo -focus=producer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
     - uses: actions/upload-artifact@v2
       with:
         name: producer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
         path: results.json
 
+  consumer-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        library: ["sarama", "confluent-poll", "confluent-channel", "kafkago"]
+        num_messages: [10000, 100000, 1000000, 5000000]
+        message_size: [1000, 2500]
+    steps:
+    - name: Free disk space
+      run: sudo apt-get clean && df -h
+    - name: Run Kafka instance
+      run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
+    - uses: actions/checkout@v2
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.14.x
+    - name: Install Ginkgo
+      run: go get -u github.com/onsi/ginkgo/ginkgo
+    - name: Create topic
+      run: |
+        COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
+        docker exec benchmark-kafka /bin/bash -c "$COMMAND"
+    - name: Test
+      env:
+        LIBRARY: ${{ matrix.library }}
+        NUM_MESSAGES: ${{ matrix.num_messages }}
+        MESSAGE_SIZE: ${{ matrix.message_size }}
+      if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 10000 }}
+      run: |
+        ginkgo --progress --compilers=2 -focus=consumer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE
+    - uses: actions/upload-artifact@v2
+      with:
+        name: consumer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
+        path: results.json        
+
   publish:
-    needs: producer-test
+    needs: 
+      - producer-test
+      - consumer-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

@@ -11,9 +11,7 @@ import (
 
 func TestBenchmark(t *testing.T) {
 	InitConfig()
-
 	RegisterFailHandler(Fail)
-	// RunSpecs(t, "Benchmark suite")
 	RunSpecsWithDefaultAndCustomReporters(t, "Benchmark suite", []Reporter{NewJSONReporter()})
 }
 
