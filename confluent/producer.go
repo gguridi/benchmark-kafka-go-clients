@@ -30,14 +30,16 @@ func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 	go func() {
 		var msgCount int
 		for e := range producer.Events() {
-			msg := e.(*kafka.Message)
-			if msg.TopicPartition.Error != nil {
-				log.WithError(msg.TopicPartition.Error).Panic("Unable to deliver the message")
-			}
-			msgCount++
-			if msgCount >= numMessages {
-				log.Infof("Sent %d messages... stopping...", msgCount)
-				Done <- true
+			switch msg := e.(type) {
+				case *kafka.Message:
+					if msg.TopicPartition.Error != nil {
+						log.WithError(msg.TopicPartition.Error).Panic("Unable to deliver the message")
+					}
+					msgCount++
+					if msgCount >= numMessages {
+						log.Infof("Sent %d messages... stopping...", msgCount)
+						Done <- true
+					}
 			}
 		}
 	}()

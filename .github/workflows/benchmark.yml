@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - fixing-newer-versions
 
 jobs:
   producer-test:
