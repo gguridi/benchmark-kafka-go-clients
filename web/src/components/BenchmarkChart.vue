@@ -6,8 +6,8 @@
         :data-background-color="background"
     >
         <template slot="content">
-            <h4 class="title">{{ winner }}</h4>
-            <p class="category">{{ description }}</p>
+            <h4 class="title">Winner: {{ winner }}</h4>
+            <p class="category">Benchmark: {{ description }}</p>
         </template>
     </chart-card>
 </template>
