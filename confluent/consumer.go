@@ -14,7 +14,7 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers":               brokers,
 		"group.id":                        fmt.Sprintf("group-%d", rand.Intn(10000)),
-		"session.timeout.ms":              6000,
+		"session.timeout.ms":              10000,
 		"go.events.channel.enable":        !poll,
 		"go.application.rebalance.enable": false,
 		"enable.auto.commit":              false,
