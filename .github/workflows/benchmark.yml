@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - fixing-newer-versions
+      - trigger-new-action
 
 jobs:
   producer-test:
