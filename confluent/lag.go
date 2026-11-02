@@ -1,7 +1,7 @@
 package confluent
 
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,7 +34,7 @@ func Lag(consumer *kafka.Consumer) int {
 		low, high, err = consumer.QueryWatermarkOffsets(*topic, partition, 5000)
 		log.Infof("Checked lag for %s/%d: result %d, %d", *topic, partition, low, high)
 		if err != nil {
-			log.WithError(err).Panic("Unable to retrieve the offsets for the partition %v", partition)
+			log.WithError(err).Panicf("Unable to retrieve the offsets for the partition %v", partition)
 		}
 
 		offset := int64(topicPartitions[i].Offset)

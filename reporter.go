@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 
 	"github.com/onsi/ginkgo/config"
 	"github.com/onsi/ginkgo/types"
+	log "github.com/sirupsen/logrus"
 )
 
 // JSONReporter is a custom reporter for Ginkgo to output the test results
@@ -50,13 +52,24 @@ func (reporter *JSONReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 			report.Smallest = value.Smallest
 			report.Largest = value.Largest
 			report.Average = value.Average
-			report.StdDeviation = value.StdDeviation
+			report.StdDeviation = finiteOrZero(value.StdDeviation)
 		}
 
-		data, _ := json.Marshal(report)
-		f, _ := os.Create("results.json")
-		f.WriteString(string(data))
+		data, err := json.Marshal(report)
+		if err != nil {
+			log.WithError(err).Panic("Unable to serialise the results")
+		}
+		if err := os.WriteFile("results.json", data, 0o644); err != nil {
+			log.WithError(err).Panic("Unable to write the results")
+		}
 	}
+}
+
+func finiteOrZero(value float64) float64 {
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return 0
+	}
+	return value
 }
 
 // SpecSuiteWillBegin implements the ginkgo.Reporter interface.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -18,7 +18,7 @@ func NewConsumer(brokers string, poll bool) *kafka.Consumer {
 		"go.events.channel.enable":        !poll,
 		"go.application.rebalance.enable": false,
 		"enable.auto.commit":              false,
-		"default.topic.config":            kafka.ConfigMap{"auto.offset.reset": "earliest"},
+		"auto.offset.reset":               "earliest",
 	})
 	if err != nil {
 		log.WithError(err).Panic("Unable to start the consumer")
@@ -44,11 +44,11 @@ func PreparePoll(consumer *kafka.Consumer, numMessages int) func() {
 				case *kafka.Message:
 					counter++
 				case kafka.PartitionEOF:
-					log.Panic("Reached Partition EOF: %v", ev)
+					log.Panicf("Reached Partition EOF: %v", ev)
 				case kafka.Error:
-					log.WithError(e).Panic("Unable to consume the message")
+					handleError(e)
 				default:
-					log.Panic("Unable to consume the message: %v", ev)
+					log.Panicf("Unable to consume the message: %v", ev)
 				}
 			}
 		}
@@ -69,12 +69,19 @@ func PrepareChannel(consumer *kafka.Consumer, numMessages int) func() {
 				case *kafka.Message:
 					counter++
 				case kafka.PartitionEOF:
-					log.Panic("Reached Partition EOF: %v", ev)
+					log.Panicf("Reached Partition EOF: %v", ev)
 				case kafka.Error:
-					log.WithError(ev.(kafka.Error)).Panic("Unable to consume the message")
+					handleError(ev.(kafka.Error))
 				}
 			}
 		}
 		log.Infof("Consumed %d messages successfully...", counter)
 	}
+}
+
+func handleError(err kafka.Error) {
+	if err.IsFatal() {
+		log.WithError(err).Panic("Unable to consume the message")
+	}
+	log.WithError(err).Warn("Transient error while consuming")
 }

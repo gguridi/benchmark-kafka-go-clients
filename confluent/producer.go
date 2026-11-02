@@ -1,7 +1,7 @@
 package confluent
 
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -31,15 +31,15 @@ func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 		var msgCount int
 		for e := range producer.Events() {
 			switch msg := e.(type) {
-				case *kafka.Message:
-					if msg.TopicPartition.Error != nil {
-						log.WithError(msg.TopicPartition.Error).Panic("Unable to deliver the message")
-					}
-					msgCount++
-					if msgCount >= numMessages {
-						log.Infof("Sent %d messages... stopping...", msgCount)
-						Done <- true
-					}
+			case *kafka.Message:
+				if msg.TopicPartition.Error != nil {
+					log.WithError(msg.TopicPartition.Error).Panic("Unable to deliver the message")
+				}
+				msgCount++
+				if msgCount >= numMessages {
+					log.Infof("Sent %d messages... stopping...", msgCount)
+					Done <- true
+				}
 			}
 		}
 	}()
@@ -49,7 +49,7 @@ func Prepare(producer *kafka.Producer, message []byte, numMessages int) func() {
 			producer.ProduceChannel() <- &kafka.Message{
 				TopicPartition: kafka.TopicPartition{
 					Topic:     &topic,
-					Partition: viper.GetInt32("kafka.partition"),
+					Partition: kafka.PartitionAny,
 				},
 				Value: message,
 			}

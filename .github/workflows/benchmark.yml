@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        library: ["sarama", "confluent", "kafkago"]
+        library: ["sarama", "confluent", "kafkago", "franzgo"]
         num_messages: [100, 1000, 10000, 100000, 1000000]
         message_size: [1000, 5000]
     steps:
@@ -18,13 +18,13 @@ jobs:
         run: sudo apt-get clean && df -h
       - name: Run Kafka instance
         run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.14.x
+          go-version-file: go.mod
       - name: Install Ginkgo
-        run: go get -u github.com/onsi/ginkgo/ginkgo
+        run: go install github.com/onsi/ginkgo/ginkgo@v1.16.5
       - name: Create topic
         run: |
           COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
@@ -34,10 +34,9 @@ jobs:
           LIBRARY: ${{ matrix.library }}
           NUM_MESSAGES: ${{ matrix.num_messages }}
           MESSAGE_SIZE: ${{ matrix.message_size }}
-        if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 1000 }}
         run: |
           ginkgo -focus=producer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE -brokers=localhost:9092 -topic=test-topic
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: producer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
           path: results.json
@@ -46,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        library: ["sarama", "confluent-poll", "confluent-channel", "kafkago"]
+        library: ["sarama", "confluent-poll", "confluent-channel", "kafkago", "franzgo"]
         num_messages: [10000, 100000, 1000000, 5000000]
         message_size: [1000, 2500]
     steps:
@@ -54,13 +53,13 @@ jobs:
         run: sudo apt-get clean && df -h
       - name: Run Kafka instance
         run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.14.x
+          go-version-file: go.mod
       - name: Install Ginkgo
-        run: go get -u github.com/onsi/ginkgo/ginkgo
+        run: go install github.com/onsi/ginkgo/ginkgo@v1.16.5
       - name: Create topic
         run: |
           COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
@@ -70,10 +69,9 @@ jobs:
           LIBRARY: ${{ matrix.library }}
           NUM_MESSAGES: ${{ matrix.num_messages }}
           MESSAGE_SIZE: ${{ matrix.message_size }}
-        if: ${{ matrix.library != 'kafkago' || matrix.num_messages <= 10000 }}
         run: |
           ginkgo --progress --compilers=2 -focus=consumer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE -brokers=localhost:9092 -topic=test-topic
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: consumer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
           path: results.json
@@ -84,10 +82,10 @@ jobs:
       - consumer-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install vue-material-dashboard
         run: git clone https://github.com/creativetimofficial/vue-material-dashboard.git --branch=v1.4.0 web/dashboard
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           path: web/src/results
       - name: Deploy into github pages

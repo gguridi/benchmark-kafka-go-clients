@@ -13,9 +13,10 @@ This benchmark has been greatly inspired by Matt Howlett's [benchmark](https://g
 
 The clients tested in this benchmark are:
 
-- [Confluent-kafka-Go](github.com/confluentinc/confluent-kafka-go)
-- [Sarama](github.com/Shopify/sarama)
-- [KafkaGo](github.com/segmentio/kafka-go)
+- [Confluent-kafka-Go](https://github.com/confluentinc/confluent-kafka-go)
+- [Sarama](https://github.com/IBM/sarama)
+- [KafkaGo](https://github.com/segmentio/kafka-go)
+- [franz-go](https://github.com/twmb/franz-go)
 
 ## Setup
 
@@ -59,6 +60,7 @@ It can be one of the following:
 - *confluent-channel*: (consumer only). To test the Confluent-kafka-Go channel-based (and deprecated) consumer.
 - *sarama*: To test the Sarama producer/consumer.
 - *kafkago*: To test the KafkaGo producer/consumer.
+- *franzgo*: To test the franz-go producer/consumer.
 
 ### Num-Messages
 

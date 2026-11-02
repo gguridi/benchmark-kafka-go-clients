@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gguridi/benchmark-kafka-go-clients/confluent"
+	"github.com/gguridi/benchmark-kafka-go-clients/franzgo"
 	"github.com/gguridi/benchmark-kafka-go-clients/kafkago"
 	"github.com/gguridi/benchmark-kafka-go-clients/sarama"
 	. "github.com/onsi/ginkgo"
@@ -48,14 +49,24 @@ var _ = Describe("Benchmarks", func() {
 			}
 			break
 		case "kafkago":
-			writer := kafkago.NewProducer(viper.GetString("kafka.brokers"))
+			writer := kafkago.NewProducer(viper.GetString("kafka.brokers"), NumMessages)
 			process := kafkago.Prepare(writer, GenMessage(), NumMessages)
 			b.Time(name, func() {
 				process()
+				<-kafkago.Done
 			})
 			if err := writer.Close(); err != nil {
 				log.WithError(err).Panic("Unable to close the producer")
 			}
+			break
+		case "franzgo":
+			client := franzgo.NewProducer(viper.GetString("kafka.brokers"))
+			process := franzgo.Prepare(client, GenMessage(), NumMessages)
+			b.Time(name, func() {
+				process()
+				<-franzgo.Done
+			})
+			client.Close()
 			break
 		default:
 			log.Panicf("Unable to find the libray %+v", Library)
@@ -120,6 +131,14 @@ var _ = Describe("Benchmarks", func() {
 				if err := reader.Close(); err != nil {
 					log.WithError(err).Panic("Unable to close the consumer")
 				}
+				break
+			case "franzgo":
+				client := franzgo.NewConsumer(viper.GetString("kafka.brokers"))
+				process := franzgo.PrepareConsume(client, NumMessages)
+				b.Time(name, func() {
+					process()
+				})
+				client.Close()
 				break
 			default:
 				log.Panicf("Unable to find the libray %+v", Library)
