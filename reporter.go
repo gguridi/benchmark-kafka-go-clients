@@ -19,6 +19,7 @@ type JSONReporter struct {
 // the report JSON file.
 type JSON struct {
 	Name         string      `json:"name"`
+	Type         string      `json:"type"`
 	Library      string      `json:"library"`
 	NumMessages  int         `json:"numMessages"`
 	SizeMessages int         `json:"sizeMessages"`
@@ -38,9 +39,13 @@ func NewJSONReporter() *JSONReporter {
 // SpecDidComplete implements the ginkgo.Reporter interface. It runs when the tests have passed,
 // allowing us to output the information into an output JSON file.
 func (reporter *JSONReporter) SpecDidComplete(specSummary *types.SpecSummary) {
+	if !specSummary.IsMeasurement {
+		return
+	}
 	switch specSummary.State {
 	case types.SpecStatePassed:
 		report := JSON{
+			Type:         specSummary.ComponentTexts[len(specSummary.ComponentTexts)-1],
 			Library:      Library,
 			NumMessages:  NumMessages,
 			SizeMessages: MessageSize,

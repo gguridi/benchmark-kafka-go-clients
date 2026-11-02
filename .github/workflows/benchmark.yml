@@ -4,15 +4,24 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
-  producer-test:
+  benchmark:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        library: ["sarama", "confluent", "kafkago", "franzgo"]
-        num_messages: [100, 1000, 10000, 100000, 1000000]
-        message_size: [1000, 5000]
+        include:
+          - { type: producer, num_messages: 10000, message_size: 1000 }
+          - { type: producer, num_messages: 10000, message_size: 5000 }
+          - { type: producer, num_messages: 1000000, message_size: 1000 }
+          - { type: producer, num_messages: 1000000, message_size: 5000 }
+          - { type: consumer, num_messages: 100000, message_size: 1000 }
+          - { type: consumer, num_messages: 100000, message_size: 2500 }
+          - { type: consumer, num_messages: 1000000, message_size: 1000 }
+          - { type: consumer, num_messages: 1000000, message_size: 2500 }
+    name: ${{ matrix.type }} ${{ matrix.num_messages }}x${{ matrix.message_size }}B
     steps:
       - name: Free disk space
         run: sudo apt-get clean && df -h
@@ -25,71 +34,33 @@ jobs:
           go-version-file: go.mod
       - name: Install Ginkgo
         run: go install github.com/onsi/ginkgo/ginkgo@v1.16.5
-      - name: Create topic
-        run: |
-          COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
-          docker exec benchmark-kafka /bin/bash -c "$COMMAND"
-      - name: Test
-        env:
-          LIBRARY: ${{ matrix.library }}
-          NUM_MESSAGES: ${{ matrix.num_messages }}
-          MESSAGE_SIZE: ${{ matrix.message_size }}
-        run: |
-          ginkgo -focus=producer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE -brokers=localhost:9092 -topic=test-topic
+      - name: Benchmark all libraries
+        run: scripts/benchmark.sh ${{ matrix.type }} ${{ matrix.num_messages }} ${{ matrix.message_size }}
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          name: producer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
-          path: results.json
-
-  consumer-test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        library: ["sarama", "confluent-poll", "confluent-channel", "kafkago", "franzgo"]
-        num_messages: [10000, 100000, 1000000, 5000000]
-        message_size: [1000, 2500]
-    steps:
-      - name: Free disk space
-        run: sudo apt-get clean && df -h
-      - name: Run Kafka instance
-        run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
-      - uses: actions/checkout@v4
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Install Ginkgo
-        run: go install github.com/onsi/ginkgo/ginkgo@v1.16.5
-      - name: Create topic
-        run: |
-          COMMAND="/opt/kafka/bin/kafka-topics.sh --create --partitions 8 --replication-factor 1 --topic test-topic --zookeeper localhost:2181"
-          docker exec benchmark-kafka /bin/bash -c "$COMMAND"
-      - name: Test
-        env:
-          LIBRARY: ${{ matrix.library }}
-          NUM_MESSAGES: ${{ matrix.num_messages }}
-          MESSAGE_SIZE: ${{ matrix.message_size }}
-        run: |
-          ginkgo --progress --compilers=2 -focus=consumer ./... -- -library=$LIBRARY -num=$NUM_MESSAGES -size=$MESSAGE_SIZE -brokers=localhost:9092 -topic=test-topic
-      - uses: actions/upload-artifact@v4
-        with:
-          name: consumer-${{ matrix.library }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
-          path: results.json
+          name: ${{ matrix.type }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
+          path: results/*.json
 
   publish:
-    needs:
-      - producer-test
-      - consumer-test
+    needs: benchmark
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Install vue-material-dashboard
-        run: git clone https://github.com/creativetimofficial/vue-material-dashboard.git --branch=v1.4.0 web/dashboard
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: yarn
+          cache-dependency-path: web/yarn.lock
       - uses: actions/download-artifact@v4
         with:
           path: web/src/results
+          merge-multiple: true
       - name: Deploy into github pages
+        working-directory: web
         run: |
-          cd web/
-          yarn install
-          yarn run deploy
+          yarn install --frozen-lockfile
+          yarn deploy
