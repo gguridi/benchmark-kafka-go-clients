@@ -20,6 +20,5 @@ dashboard/
 results/
 dist/
 package-lock.json
-yarn.lock
 /docs
 results.json

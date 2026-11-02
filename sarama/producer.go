@@ -4,8 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Shopify/sarama"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/IBM/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -56,9 +55,8 @@ func Prepare(producer sarama.AsyncProducer, message []byte, numMessages int) fun
 	return func() {
 		for j := 0; j < numMessages; j++ {
 			producer.Input() <- &sarama.ProducerMessage{
-				Topic:     viper.GetString("kafka.topic"),
-				Partition: kafka.PartitionAny,
-				Value:     sarama.ByteEncoder(message),
+				Topic: viper.GetString("kafka.topic"),
+				Value: sarama.ByteEncoder(message),
 			}
 		}
 	}
