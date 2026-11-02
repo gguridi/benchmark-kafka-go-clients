@@ -2,97 +2,67 @@
 
 ![Benchmark](https://github.com/gguridi/benchmark-kafka-go-clients/workflows/Benchmark/badge.svg?branch=master)
 
-Benchmark to test different kafka go clients to compare them under the same conditions.
+Throughput benchmarks of the Kafka Go clients, run on GitHub Actions and
+published to a [dashboard](https://gguridi.github.io/benchmark-kafka-go-clients/).
 
-This started as a proof of concept of creating some benchmarks that could run directly
-on github actions, publishing the results in a dashboard associated with the same repository.
-
-This benchmark has been greatly inspired by Matt Howlett's [benchmark](https://gist.github.com/mhowlett/e9491aad29817aeda6003c3404874b35). I shamelessly used what it has instead of reading the documentation of the different clients :S.
+Inspired by Matt Howlett's
+[benchmark](https://gist.github.com/mhowlett/e9491aad29817aeda6003c3404874b35).
 
 ## Clients
 
-The clients tested in this benchmark are:
+| Client                                                                   | Producer    | Consumer         |
+| ------------------------------------------------------------------------ | ----------- | ---------------- |
+| [confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go) | `confluent` | `confluent-poll` |
+| [Sarama](https://github.com/IBM/sarama)                                  | `sarama`    | `sarama`         |
+| [kafka-go](https://github.com/segmentio/kafka-go)                        | `kafkago`   | `kafkago`        |
+| [franz-go](https://github.com/twmb/franz-go)                             | `franzgo`   | `franzgo`        |
 
-- [Confluent-kafka-Go](https://github.com/confluentinc/confluent-kafka-go)
-- [Sarama](https://github.com/IBM/sarama)
-- [KafkaGo](https://github.com/segmentio/kafka-go)
-- [franz-go](https://github.com/twmb/franz-go)
+## Prerequisites
 
-## Setup
+- Go (version in `go.mod`)
+- Ginkgo v1 CLI
+- Docker
+- Node 24 and Yarn 1, for the dashboard
 
-In order to run the benchmarks we need the following cli tools installed:
+## Run the benchmarks
 
-- [Ginkgo](https://github.com/onsi/ginkgo).
-
-## Running
-
-In order to run the benchmark tests we need a working kafka image. In this benchmark I've used
-docker-based Kafka instances but it's possible to use any kafka.
-
-To run the benchmarks we use the following syntax:
+Start Kafka:
 
 ```bash
-ginkgo -focus=${type} ./... -- -test.bench=. -library=${client} -num=${num-messages} -size=${size-messages} -brokers=${brokers} -topic=${topic}
+docker run --rm --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
 ```
 
-### Type
-
-It can be one of the following:
-
-- *producer*: To test the client producers against the kafka brokers selected.
-- *consumer*: To test the client consumers against the kafka brokers selected.
-- *lag*: To perform a lag check agains a topic to see if the producer sent all the messages as expected. 
-
-The syntax of the lag is slightly different to the other two types.
+Run every client for one configuration. Results are written to
+`results/<type>-<client>-<num>-<size>.json`:
 
 ```bash
-ginkgo -focus=lag ./... -- -test.bench=. -num=${num-messages} -brokers=${brokers} -topic=${topic}
+scripts/benchmark.sh <producer|consumer> <num-messages> <message-size>
 ```
 
-Where `num-messages` is the number of messages we would expect to find in that topic.
+The script reads `BROKERS` (default `localhost:9092`), `KAFKA_CONTAINER` (default
+`benchmark-kafka`), `OUTPUT_DIR` (default `results`) and `GINKGO` (default `ginkgo`).
 
-### Client
+Run a single client:
 
-It can be one of the following:
+```bash
+ginkgo -focus=producer . -- -library=franzgo -num=10000 -size=1000 -brokers=localhost:9092 -topic=test-topic
+```
 
-- *confluent*: (producer only). To test the Confluent-kafka-Go producer.
-- *confluent-poll*: (consumer only). To test the Confluent-kafka-Go polling-based consumer.
-- *confluent-channel*: (consumer only). To test the Confluent-kafka-Go channel-based (and deprecated) consumer.
-- *sarama*: To test the Sarama producer/consumer.
-- *kafkago*: To test the KafkaGo producer/consumer.
-- *franzgo*: To test the franz-go producer/consumer.
+Consumers read messages already in the topic; fill it first with
+`-focus=prepopulates`, which writes 1.5 × `-num` messages.
 
-### Num-Messages
+## Dashboard
 
-It's an integer specifying the number of messages to produce/consume for the benchmark.
+```bash
+cd web
+yarn install
+yarn dev
+```
 
-### Size-Messages
+The dashboard reads the result files from `web/src/results/`.
 
-It's an integer specifying the size of messages to use for the benchmark. In case of the
-consumers the Kafka instance will be prepopulated with messages of this size to be consumed.
-
-### Brokers
-
-Location of the kafka brokers to use for this benchmark. It includes the port. For instance `localhost:9092`.
-
-### Topic
-
-The topic as string to use for this benchmark.
-
-## Output
-
-The output of the benchmarks is automatically display in the dashboard. The results
-are downloaded from the github actions, where are stored as artifacts, and used
-as sources when building the results dashboard.
-
-- https://gguridi.github.io/benchmark-kafka-go-clients/
-
-If a client doesn't appear in the graph is because the time used in the benchmark is so much
-higher than I didn't consider it necessary to perform further tests of it.
-
-## Thanks
-
-Special thanks to the components that I used for this:
-
-- Matt Howlett's [Benchmark](https://gist.github.com/mhowlett/e9491aad29817aeda6003c3404874b35)
-- Creative Tim [Vue Material Dashboard](https://www.creative-tim.com/product/vue-material-dashboard)
+```bash
+yarn lint
+yarn test
+yarn build
+```
