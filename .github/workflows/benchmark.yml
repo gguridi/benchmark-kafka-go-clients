@@ -27,16 +27,16 @@ jobs:
         run: sudo apt-get clean && df -h
       - name: Run Kafka instance
         run: docker run --name benchmark-kafka -e KAFKA__ADVERTISED_HOST_NAME=localhost -d -p 9092:9092 -p 2181:2181 gguridi/kafka:2.12-2.0.0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Install Ginkgo
         run: go install github.com/onsi/ginkgo/ginkgo@v1.16.5
       - name: Benchmark all libraries
         run: scripts/benchmark.sh ${{ matrix.type }} ${{ matrix.num_messages }} ${{ matrix.message_size }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ matrix.type }}-${{ matrix.num_messages }}-${{ matrix.message_size }}
@@ -49,13 +49,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: web/.nvmrc
           cache: yarn
           cache-dependency-path: web/yarn.lock
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: web/src/results
           merge-multiple: true
